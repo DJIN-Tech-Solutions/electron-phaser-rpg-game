@@ -12,6 +12,7 @@ onMounted(async function initGame() {
   if (!gameContainer.value) return
 
   const Phaser = (await import('phaser')).default
+  const { BootScene } = await import('./game/BootScene')
   const { GameScene } = await import('./game/GameScene')
 
   game = new Phaser.Game({
@@ -19,15 +20,17 @@ onMounted(async function initGame() {
     parent: gameContainer.value,
     width: 800,
     height: 600,
-    backgroundColor: '#0d0d1a',
-    scene: [GameScene],
+    backgroundColor: '#000',
+    scene: [BootScene, GameScene],
+    physics: {
+      default: 'arcade',
+      arcade: { debug: false },
+    },
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    render: {
-      antialias: true,
-    },
+    pixelArt: true,
   })
 })
 
