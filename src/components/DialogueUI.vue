@@ -133,7 +133,7 @@ watch(
         <div v-if="gameStore.state === 'player_choice'" class="options">
 
           <template v-if="!showInput">
-            <button class="btn btn--flirt"   @click="sendIntent(INTENTS.flirt)">😊 フリート</button>
+            <button class="btn btn--flirt"   @click="sendIntent(INTENTS.flirt)">😊 ナンパ</button>
             <button class="btn btn--neutral" @click="sendIntent(INTENTS.neutral)">😐 普通に話す</button>
             <button class="btn btn--tease"   @click="sendIntent(INTENTS.tease)">😏 からかう</button>
             <button class="btn btn--write"   @click="showInput = true">✍️ 何か書く...</button>
