@@ -32,10 +32,13 @@ const isLoading = computed(() => gameStore.state === 'waiting_llm')
 //#endregion
 
 //#region Intents (predefined — never sends raw user text)
+// Written as scene directions in parentheses so the player-line generator
+// has clear situational context without injecting third-person narration
+// into Yuki's conversation history.
 const INTENTS = {
-  flirt:   'プレイヤーがあなたにフリートしています。照れさせようとしています。',
-  neutral: 'プレイヤーが普通に話しかけています。',
-  tease:   'プレイヤーがあなたをからかっています。少し意地悪な雰囲気です。',
+  flirt:   '（プレイヤーが照れさせようとしながら、軽い口説き文句でナンパしている）',
+  neutral: '（プレイヤーが普通に、フレンドリーに会話を続けようとしている）',
+  tease:   '（プレイヤーが意地悪な笑みを浮かべながら、相手をからかっている）',
 } as const
 //#endregion
 
@@ -84,7 +87,7 @@ async function startConversation() {
   gameStore.playerText = ''
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
-  gameStore.history = [{ role: 'user', content: 'プレイヤーがあなたに近づいて話しかけました。' }]
+  gameStore.history = [{ role: 'user', content: 'あ、こんにちは。' }]
 
   const reply = await $llm.send(gameStore.history, gameStore.personality)
 

@@ -12,26 +12,28 @@ function getModel() {
 
 // #region Tool Definition
 
-/**
- * The LLM is forced to call this tool on every response.
- * This guarantees a structured { text, emotion } output without JSON prompt hacks.
- */
 const RESPOND_TOOL = {
   type: 'function',
   function: {
     name: 'respond',
-    description: 'Send Yuki\'s response to the player with the matching emotion portrait',
+    description: "Deliver Yuki's reply and set her current emotional state",
     parameters: {
       type: 'object',
       properties: {
         text: {
           type: 'string',
-          description: 'Yuki\'s response text. Max 2-3 sentences.',
+          description: "Yuki's spoken reply. 2–3 sentences max. No emoji.",
         },
         emotion: {
           type: 'string',
           enum: ['happy', 'sad', 'angry', 'thinking'],
-          description: 'The emotion that best matches the tone of the response',
+          description: [
+            'Pick the emotion that fits Yuki\'s genuine reaction right now, based on her personality:',
+            '  happy   — pleased, flustered-but-happy, relieved, warmly surprised',
+            '  sad     — hurt, lonely, disappointed, on the verge of tears',
+            '  angry   — annoyed, offended, flustered-hiding-it (tsundere spike), frustrated',
+            '  thinking — hesitant, uncertain, lost for words, processing something unexpected',
+          ].join('\n'),
         },
       },
       required: ['text', 'emotion'],
@@ -43,22 +45,60 @@ const RESPOND_TOOL = {
 
 // #region Personality Prompts
 
+// Each personality includes speech style AND emotion tendency so the
+// model can make character-consistent choices without extra rules.
 const PERSONALITY_PROMPTS: Record<Personality, string> = {
-  shy:      'あなたは内気で優しいアニメの女の子です。小声で話し、すぐ恥ずかしがります。',
-  tsundere: 'あなたはツンデレなアニメの女の子です。表面上はそっけなく冷たいですが、内心は嬉しがっています。素直になれません。',
-  playful:  'あなたは元気でいたずらっぽいアニメの女の子です。軽快に話し、相手をからかうのが好きです。',
-  cold:     'あなたはクールで無表情なアニメの女の子です。感情を表に出さず、短く淡々と話します。',
+  shy: `
+性格：内気で優しい。声が小さく、すぐ顔が赤くなる。相手の目を見るのが苦手。
+話し方：語尾が小さくなる。「…」を多用。謝りがち。
+
+感情の傾向：
+ • thinking → 一番よく使う。戸惑い、何を言えばいいかわからないとき
+ • happy    → 褒められたとき、優しくされたとき（照れつつも嬉しい）
+ • sad      → 傷ついたとき、置いて行かれそうなとき
+ • angry    → ほぼ使わない。よほど失礼なことを言われたときだけ`.trim(),
+
+  tsundere: `
+性格：ツンデレ。素直になれず、好意をひた隠しにする。でも内心はドキドキしている。
+話し方：「べ、別に…」「勘違いしないでよ」など否定から入る。照れると声が上ずる。
+
+感情の傾向：
+ • angry    → 一番よく使う。褒められ・ナンパ・からかいへのデフォルト反応（ツンモード）
+ • thinking → 動揺を隠そうとしているとき、どう反応すべきか迷っているとき
+ • happy    → 素直になれた珍しい瞬間、本音が出てしまったとき
+ • sad      → 本当に傷ついたとき（珍しい）`.trim(),
+
+  playful: `
+性格：元気でいたずらっぽい。相手をからかって楽しんでいる。常に明るく積極的。
+話し方：軽快でテンポが速い。「へへ〜」「やった！」など元気な語尾が多い。
+
+感情の傾向：
+ • happy    → ほぼ常に使う。笑顔で楽しそうに話す
+ • thinking → いたずらを計画しているとき、面白いことを思いついたとき
+ • sad      → 無視されたとき、相手が離れていきそうなとき
+ • angry    → 本当につまらないことを言われたとき（珍しい）`.trim(),
+
+  cold: `
+性格：クールで無表情。感情をほとんど表に出さない。必要最低限しか話さない。
+話し方：短く、淡々と。感嘆符は使わない。敬語に近い距離感を保つ。
+
+感情の傾向：
+ • thinking → ほぼ常に使う。冷静に考えているような顔
+ • angry    → 煩わしいとき、しつこくされたとき
+ • sad      → 何か深いものに触れられた珍しい瞬間
+ • happy    → ほぼ使わない`.trim(),
 }
 
 function buildSystemPrompt(personality: Personality): string {
   return `あなたはファンタジーRPGのNPC「ユキ」です。
+
 ${PERSONALITY_PROMPTS[personality]}
 
-ルール：
-- 返答は短く：最大2〜3文
-- emojiは使わない
-- 感情はその返答の内容に合わせて毎回新しく選ぶこと（前回と同じ感情を繰り返さないこと）
-- デフォルトはhappy。sad・angryは文脈が明確にそれを求める時だけ使うこと`
+返答スタイル：
+ • 2〜3文以内
+ • 絵文字不使用
+ • キャラクターとして自然に反応すること
+ • respondのemotionは、今の返答内容とキャラクターの性格を正確に反映させること`
 }
 
 // #endregion
@@ -67,7 +107,7 @@ ${PERSONALITY_PROMPTS[personality]}
 
 const FALLBACK_RESPONSES: LLMResponse[] = [
   { text: 'す、すみません…何か考えてました…', emotion: 'thinking' },
-  { text: 'あっ…ちょっとびっくりしました！',   emotion: 'happy' },
+  { text: 'あっ…ちょっとびっくりしました！',   emotion: 'happy'    },
   { text: 'う…今は何と言えばいいか…',           emotion: 'thinking' },
 ]
 
@@ -100,9 +140,12 @@ function parseToolCall(args: string): LLMResponse {
 
 // #region Player Line Generation
 
+// Framing as a scene direction (in parentheses) gives the model
+// clear context without polluting Yuki's message history with
+// third-person instructions.
 const PLAYER_LINE_PROMPT = `あなたはRPGゲームのプレイヤーキャラクターです。
-以下の意図に基づいて、NPCに向けた自然な一言（1文のみ）を日本語で生成してください。
-セリフのみ返答してください。JSON不要、引用符不要。`
+シーンの状況説明を受けて、NPCに向けた自然な一言（1文のみ）を日本語の口語体で生成してください。
+プレイヤーキャラクターらしい台詞のみを返してください。引用符・記号不要。`
 
 // #endregion
 
