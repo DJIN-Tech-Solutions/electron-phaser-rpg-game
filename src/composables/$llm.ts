@@ -20,7 +20,7 @@ ${PERSONALITY_PROMPTS[personality]}
 {"text": "ここに返答を書く", "emotion": "happy"}
 
 必須ルール：
-- 返答は短く：最大1〜2文
+- 返答は短く：最大2〜3文
 - "emotion"は必ずこのいずれか：happy, sad, angry, thinking
 - emojiは使わない
 - 感情はキャラクターの性格と文脈に合わせること
@@ -83,7 +83,7 @@ const $llm = {
         body: JSON.stringify({
           model: GROQ_MODEL,
           messages: [{ role: 'system', content: buildSystemPrompt(personality) }, ...history],
-          max_tokens: 150,
+          max_tokens: 300,
           temperature: 0.85,
         }),
       })
