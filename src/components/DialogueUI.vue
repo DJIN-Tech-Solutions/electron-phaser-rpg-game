@@ -104,20 +104,6 @@ watch(
   <Transition name="slide-up">
     <div v-if="isVisible" class="dialogue-overlay">
 
-      <!--#region Portrait -->
-      <div class="portrait-container">
-        <img
-          :src="portrait"
-          :alt="gameStore.emotion"
-          class="portrait"
-          :class="{ 'portrait--thinking': isLoading }"
-        />
-        <div v-if="isLoading" class="thinking-dots">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-      <!--#endregion Portrait -->
-
       <!--#region Dialogue Box -->
       <div class="dialogue-box">
 
@@ -162,6 +148,20 @@ watch(
       </div>
       <!--#endregion Dialogue Box -->
 
+      <!--#region Portrait -->
+      <div class="portrait-container">
+        <img
+          :src="portrait"
+          :alt="gameStore.emotion"
+          class="portrait"
+          :class="{ 'portrait--thinking': isLoading }"
+        />
+        <div v-if="isLoading" class="thinking-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <!--#endregion Portrait -->
+
     </div>
   </Transition>
   <!--#endregion Dialogue Overlay -->
@@ -190,13 +190,13 @@ watch(
 }
 
 .portrait {
-  width: 180px;
-  height: 270px;
+  width: 260px;
+  height: 390px;
   object-fit: cover;
   object-position: top;
   border-radius: 12px 12px 0 0;
   border: 2px solid #7c3aed;
-  box-shadow: 0 0 24px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 32px rgba(124, 58, 237, 0.6);
   transition: filter 0.3s ease;
 }
 
