@@ -12,7 +12,9 @@ const emotionMap: Record<Emotion, string> = {
   happy:    '/npc_01_happy.png',
   sad:      '/npc_01_sad.png',
   angry:    '/npc_01_angry.png',
-  bored:    '/npc_01_bored.png',
+  bored:        '/npc_01_bored.png',
+  cheerleading: '/npc_01_cheerleading.png',
+  cheers:       '/npc_01_cheers.png',
 }
 //#endregion
 

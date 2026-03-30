@@ -8,7 +8,7 @@ export type GameState =
   | 'npc_reply'
   | 'player_choice'
 
-export type Emotion = 'thinking' | 'happy' | 'sad' | 'angry' | 'bored'
+export type Emotion = 'thinking' | 'happy' | 'sad' | 'angry' | 'bored' | 'cheerleading' | 'cheers'
 
 export type Personality = 'shy' | 'tsundere' | 'playful' | 'cold'
 
