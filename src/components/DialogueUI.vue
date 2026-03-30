@@ -31,11 +31,19 @@ const isVisible = computed(() =>
 const isLoading = computed(() => gameStore.state === 'waiting_llm')
 //#endregion
 
+//#region Intents (predefined — never sends raw user text)
+const INTENTS = {
+  flirt:   'プレイヤーがあなたにフリートしています。照れさせようとしています。',
+  neutral: 'プレイヤーが普通に話しかけています。',
+  tease:   'プレイヤーがあなたをからかっています。少し意地悪な雰囲気です。',
+} as const
+//#endregion
+
 //#region Conversation Logic
-async function startConversation() {
+async function sendIntent(intent: string) {
+  gameStore.history.push({ role: 'user', content: intent })
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
-  gameStore.history = [{ role: 'user', content: 'こんにちは！' }]
 
   const reply = await $llm.send(gameStore.history)
 
@@ -45,11 +53,15 @@ async function startConversation() {
   gameStore.state = 'player_choice'
 }
 
-async function sendPlayerMessage(message: string) {
+async function sendFreeText() {
+  const text = customInput.value.trim()
+  if (!text) return
+
   showInput.value = false
   customInput.value = ''
 
-  gameStore.history.push({ role: 'user', content: message })
+  // Only path where actual user text reaches the LLM
+  gameStore.history.push({ role: 'user', content: `プレイヤーが言いました：「${text}」` })
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
 
@@ -61,24 +73,20 @@ async function sendPlayerMessage(message: string) {
   gameStore.state = 'player_choice'
 }
 
-function handleFlertar() {
-  sendPlayerMessage('*微笑んで近づく* ね、すごく可愛いですよね？')
+async function startConversation() {
+  gameStore.emotion = 'thinking'
+  gameStore.state = 'waiting_llm'
+  gameStore.history = [{ role: 'user', content: 'プレイヤーがあなたに近づいて話しかけました。' }]
+
+  const reply = await $llm.send(gameStore.history)
+
+  gameStore.history.push({ role: 'assistant', content: reply.text })
+  gameStore.emotion = reply.emotion
+  gameStore.npcText = reply.text
+  gameStore.state = 'player_choice'
 }
 
-function handlePerguntar() {
-  showInput.value = true
-}
-
-function handleEscrever() {
-  showInput.value = true
-}
-
-function handleSubmitInput() {
-  if (!customInput.value.trim()) return
-  sendPlayerMessage(customInput.value.trim())
-}
-
-function handleIrEmbora() {
+function handleLeave() {
   gameStore.state = 'idle'
   gameStore.history = []
   gameStore.npcText = ''
@@ -121,27 +129,33 @@ watch(
         </div>
         <!--#endregion -->
 
-        <!--#region Player Input -->
-        <div v-if="showInput" class="input-area">
-          <input
-            v-model="customInput"
-            type="text"
-            placeholder="何か書いてください..."
-            class="player-input"
-            autofocus
-            @keydown.enter="handleSubmitInput"
-            @keydown.escape="showInput = false"
-          />
-          <button class="btn btn--send" @click="handleSubmitInput">送信</button>
-        </div>
-        <!--#endregion -->
-
         <!--#region Player Options -->
-        <div v-if="gameStore.state === 'player_choice' && !showInput" class="options">
-          <button class="btn btn--flirt" @click="handleFlertar">[ 口説く ]</button>
-          <button class="btn btn--ask" @click="handlePerguntar">[ 聞く ]</button>
-          <button class="btn btn--write" @click="handleEscrever">[ 何か書く... ]</button>
-          <button class="btn btn--leave" @click="handleIrEmbora">[ 立ち去る ]</button>
+        <div v-if="gameStore.state === 'player_choice'" class="options">
+
+          <template v-if="!showInput">
+            <button class="btn btn--flirt"   @click="sendIntent(INTENTS.flirt)">😊 フリート</button>
+            <button class="btn btn--neutral" @click="sendIntent(INTENTS.neutral)">😐 普通に話す</button>
+            <button class="btn btn--tease"   @click="sendIntent(INTENTS.tease)">😏 からかう</button>
+            <button class="btn btn--write"   @click="showInput = true">✍️ 何か書く...</button>
+            <button class="btn btn--leave"   @click="handleLeave">🚪 立ち去る</button>
+          </template>
+
+          <template v-else>
+            <div class="input-area">
+              <input
+                v-model="customInput"
+                type="text"
+                placeholder="メッセージを入力..."
+                class="player-input"
+                autofocus
+                @keydown.enter="sendFreeText"
+                @keydown.escape="showInput = false"
+              />
+              <button class="btn btn--send" @click="sendFreeText">送信</button>
+              <button class="btn btn--cancel" @click="showInput = false">✕</button>
+            </div>
+          </template>
+
         </div>
         <!--#endregion -->
 
@@ -283,7 +297,13 @@ watch(
   100% { background-position: -200% 0; }
 }
 
-/***  Input  ***/
+/***  Options  ***/
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .input-area {
   display: flex;
   gap: 8px;
@@ -306,36 +326,33 @@ watch(
   border-color: #a78bfa;
 }
 
-/***  Options  ***/
-.options {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 .btn {
   font-family: monospace;
   font-size: 13px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(124, 58, 237, 0.35);
   cursor: pointer;
-  transition: all 0.2s;
-  background: rgba(30, 10, 60, 0.7);
-  color: #e9d5ff;
-  border-color: rgba(124, 58, 237, 0.4);
+  transition: all 0.18s;
+  background: rgba(20, 8, 45, 0.75);
+  color: #d8b4fe;
+  text-align: left;
 }
 
 .btn:hover {
-  background: rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.25);
   border-color: #a78bfa;
   color: #fff;
-  box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.25);
+  transform: translateX(3px);
 }
 
-.btn--flirt:hover  { border-color: #f472b6; color: #fce7f3; }
-.btn--leave:hover  { border-color: #ef4444; color: #fecaca; }
-.btn--send         { flex-shrink: 0; }
+.btn--flirt:hover   { border-color: #f472b6; color: #fce7f3; background: rgba(244, 114, 182, 0.15); }
+.btn--tease:hover   { border-color: #fb923c; color: #fed7aa; background: rgba(251, 146, 60, 0.12); }
+.btn--leave:hover   { border-color: #f87171; color: #fecaca; background: rgba(248, 113, 113, 0.12); }
+.btn--write         { border-style: dashed; }
+.btn--send,
+.btn--cancel        { flex-shrink: 0; }
 
 /***  Transition  ***/
 .slide-up-enter-active,
