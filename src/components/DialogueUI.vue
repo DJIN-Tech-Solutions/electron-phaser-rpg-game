@@ -41,9 +41,16 @@ const INTENTS = {
 
 //#region Conversation Logic
 async function sendIntent(intent: string) {
-  gameStore.history.push({ role: 'user', content: intent })
+  gameStore.playerText = ''
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
+
+  // Step 1: generate what the player says from the intent
+  const playerLine = await $llm.generatePlayerLine(intent)
+  gameStore.playerText = playerLine
+
+  // Step 2: send that line to Yuki
+  gameStore.history.push({ role: 'user', content: playerLine })
 
   const reply = await $llm.send(gameStore.history, gameStore.personality)
 
@@ -60,7 +67,7 @@ async function sendFreeText() {
   showInput.value = false
   customInput.value = ''
 
-  // Only path where actual user text reaches the LLM
+  gameStore.playerText = text
   gameStore.history.push({ role: 'user', content: `プレイヤーが言いました：「${text}」` })
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
@@ -74,6 +81,7 @@ async function sendFreeText() {
 }
 
 async function startConversation() {
+  gameStore.playerText = ''
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
   gameStore.history = [{ role: 'user', content: 'プレイヤーがあなたに近づいて話しかけました。' }]
@@ -90,6 +98,7 @@ function handleLeave() {
   gameStore.state = 'idle'
   gameStore.history = []
   gameStore.npcText = ''
+  gameStore.playerText = ''
   showInput.value = false
   customInput.value = ''
 }
@@ -115,9 +124,16 @@ watch(
       <!--#region Dialogue Box -->
       <div class="dialogue-box">
 
-        <div class="npc-name">Yuki</div>
+        <!--#region Player Bubble -->
+        <div v-if="gameStore.playerText" class="player-bubble">
+          <span class="player-bubble__label">あなた</span>
+          <span class="player-bubble__text">{{ gameStore.playerText }}</span>
+        </div>
+        <!--#endregion -->
 
-        <!--#region Text / Loading -->
+        <!--#region Yuki Response -->
+        <div class="npc-name">ユキ</div>
+
         <div class="dialogue-text">
           <template v-if="isLoading">
             <span class="loading-bar"></span>
@@ -243,12 +259,40 @@ watch(
   40% { transform: scale(1); opacity: 1; }
 }
 
+/***  Player Bubble  ***/
+.player-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 8px 12px;
+  background: rgba(49, 46, 129, 0.4);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 10px 10px 2px 10px;
+  align-self: flex-end;
+}
+
+.player-bubble__label {
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #818cf8;
+  text-transform: uppercase;
+}
+
+.player-bubble__text {
+  font-family: monospace;
+  font-size: 14px;
+  color: #c7d2fe;
+  text-align: right;
+}
+
 /***  Dialogue Box  ***/
 .dialogue-box {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   padding: 20px 24px;
   background: rgba(15, 8, 35, 0.92);
   border: 1px solid rgba(124, 58, 237, 0.4);

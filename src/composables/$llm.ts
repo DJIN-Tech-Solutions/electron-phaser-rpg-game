@@ -64,7 +64,46 @@ function offlineResponse(): LLMResponse {
 
 // #region Composable
 
+const PLAYER_LINE_PROMPT = `あなたはRPGゲームのプレイヤーキャラクターです。
+以下の意図に基づいて、NPCに向けた自然な一言（1文のみ）を日本語で生成してください。
+セリフのみ返答してください。JSON不要、引用符不要。`
+
 const $llm = {
+  async generatePlayerLine(intent: string): Promise<string> {
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY as string | undefined
+
+    if (!apiKey) {
+      await new Promise(resolve => setTimeout(resolve, 400))
+      return '...'
+    }
+
+    try {
+      const res = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [
+            { role: 'system', content: PLAYER_LINE_PROMPT },
+            { role: 'user',   content: intent },
+          ],
+          max_tokens: 80,
+          temperature: 0.9,
+        }),
+      })
+
+      if (!res.ok) return '...'
+
+      const data = await res.json() as { choices: Array<{ message: { content: string } }> }
+      return data?.choices?.[0]?.message?.content?.trim() ?? '...'
+    } catch {
+      return '...'
+    }
+  },
+
   async send(history: Message[], personality: Personality = 'shy'): Promise<LLMResponse> {
     const apiKey = import.meta.env.VITE_GROQ_API_KEY as string | undefined
 

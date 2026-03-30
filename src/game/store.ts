@@ -9,6 +9,7 @@ export const gameStore = reactive({
   npcText: '',
   history: [] as Message[],
   personality: 'shy' as Personality,
+  playerText: '',
 })
 
 // #endregion
