@@ -3,7 +3,7 @@ import type { LLMResponse, Message, Personality } from '../game/types'
 // #region Constants
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = 'llama-3.1-8b-instant'
+const GROQ_MODEL = (import.meta.env.VITE_GROQ_MODEL as string | undefined) ?? 'llama-3.1-8b-instant'
 
 const PERSONALITY_PROMPTS: Record<Personality, string> = {
   shy:      'あなたは内気で優しいアニメの女の子です。小声で話し、すぐ恥ずかしがります。',
