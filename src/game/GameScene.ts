@@ -198,7 +198,7 @@ export class GameScene extends Phaser.Scene {
     const near = dist < INTERACT_RANGE
 
     if (near) {
-      this.hintText.setText('[ E ] Conversar').setVisible(true)
+      this.hintText.setText('[ E ] 話しかける').setVisible(true)
       if (gameStore.state !== 'near_npc') gameStore.state = 'near_npc'
 
       if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {

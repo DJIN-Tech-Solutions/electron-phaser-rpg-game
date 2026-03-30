@@ -35,7 +35,7 @@ const isLoading = computed(() => gameStore.state === 'waiting_llm')
 async function startConversation() {
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
-  gameStore.history = [{ role: 'user', content: 'Olá!' }]
+  gameStore.history = [{ role: 'user', content: 'こんにちは！' }]
 
   const reply = await $llm.send(gameStore.history)
 
@@ -62,7 +62,7 @@ async function sendPlayerMessage(message: string) {
 }
 
 function handleFlertar() {
-  sendPlayerMessage('*sorri e se aproxima* Você sabe que é muito bonita, né?')
+  sendPlayerMessage('*微笑んで近づく* ね、すごく可愛いですよね？')
 }
 
 function handlePerguntar() {
@@ -140,22 +140,22 @@ watch(
           <input
             v-model="customInput"
             type="text"
-            placeholder="Escreva algo..."
+            placeholder="何か書いてください..."
             class="player-input"
             autofocus
             @keydown.enter="handleSubmitInput"
             @keydown.escape="showInput = false"
           />
-          <button class="btn btn--send" @click="handleSubmitInput">Enviar</button>
+          <button class="btn btn--send" @click="handleSubmitInput">送信</button>
         </div>
         <!--#endregion -->
 
         <!--#region Player Options -->
         <div v-if="gameStore.state === 'player_choice' && !showInput" class="options">
-          <button class="btn btn--flirt" @click="handleFlertar">[ Flertar ]</button>
-          <button class="btn btn--ask" @click="handlePerguntar">[ Perguntar ]</button>
-          <button class="btn btn--write" @click="handleEscrever">[ Escrever algo... ]</button>
-          <button class="btn btn--leave" @click="handleIrEmbora">[ Ir embora ]</button>
+          <button class="btn btn--flirt" @click="handleFlertar">[ 口説く ]</button>
+          <button class="btn btn--ask" @click="handlePerguntar">[ 聞く ]</button>
+          <button class="btn btn--write" @click="handleEscrever">[ 何か書く... ]</button>
+          <button class="btn btn--leave" @click="handleIrEmbora">[ 立ち去る ]</button>
         </div>
         <!--#endregion -->
 

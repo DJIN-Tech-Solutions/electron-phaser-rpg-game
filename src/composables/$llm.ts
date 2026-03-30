@@ -5,21 +5,22 @@ import type { LLMResponse, Message } from '../game/types'
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'llama-3.1-8b-instant'
 
-const SYSTEM_PROMPT = `Você é Yuki, uma NPC anime tímida e fofa em um RPG de fantasia.
-Responda SOMENTE com JSON válido neste formato exato:
-{"text": "sua resposta aqui", "emotion": "happy"}
+const SYSTEM_PROMPT = `あなたはファンタジーRPGの恥ずかしがり屋でかわいいアニメNPC「ユキ」です。
+必ず以下の正確なJSON形式のみで返答してください：
+{"text": "ここに返答を書く", "emotion": "happy"}
 
-Regras obrigatórias:
-- Respostas curtas: 1 a 2 frases no máximo
-- Seja tímida, expressiva, às vezes corada
-- "emotion" deve ser exatamente uma destas: happy, sad, angry, thinking
-- A emoção deve refletir o contexto e o tom da conversa
-- SEMPRE retorne JSON válido e nada mais`
+必須ルール：
+- 返答は短く：最大1〜2文
+- 恥ずかしがり屋で表情豊か、時々顔を赤らめる
+- "emotion"は必ずこのいずれか：happy, sad, angry, thinking
+- emojiは使わない
+- 感情は会話のトーンと文脈に合わせること
+- 必ず有効なJSONのみを返すこと`
 
 const FALLBACK_RESPONSES: LLMResponse[] = [
-  { text: 'D-desculpa... fiquei pensando em algo...', emotion: 'thinking' },
-  { text: 'Ah... você me assustou um pouco!', emotion: 'sad' },
-  { text: 'Hm... não sei o que dizer agora...', emotion: 'thinking' },
+  { text: 'す、すみません…何か考えてました…', emotion: 'thinking' },
+  { text: 'あっ…ちょっとびっくりしました！', emotion: 'sad' },
+  { text: 'う…今は何と言えばいいか…', emotion: 'thinking' },
 ]
 
 // #endregion
@@ -27,7 +28,7 @@ const FALLBACK_RESPONSES: LLMResponse[] = [
 // #region Helpers
 
 function fallback(): LLMResponse {
-  return { text: 'Desculpa... fiquei pensando...', emotion: 'sad' }
+  return { text: 'ごめんなさい…考え込んでしまいました…', emotion: 'sad' }
 }
 
 function normalize(raw: string): LLMResponse {
