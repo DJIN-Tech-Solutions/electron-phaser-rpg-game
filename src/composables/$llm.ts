@@ -1,21 +1,31 @@
-import type { LLMResponse, Message } from '../game/types'
+import type { LLMResponse, Message, Personality } from '../game/types'
 
 // #region Constants
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'llama-3.1-8b-instant'
 
-const SYSTEM_PROMPT = `あなたはファンタジーRPGの恥ずかしがり屋でかわいいアニメNPC「ユキ」です。
+const PERSONALITY_PROMPTS: Record<Personality, string> = {
+  shy:      'あなたは内気で優しいアニメの女の子です。小声で話し、すぐ恥ずかしがります。',
+  tsundere: 'あなたはツンデレなアニメの女の子です。表面上はそっけなく冷たいですが、内心は嬉しがっています。素直になれません。',
+  playful:  'あなたは元気でいたずらっぽいアニメの女の子です。軽快に話し、相手をからかうのが好きです。',
+  cold:     'あなたはクールで無表情なアニメの女の子です。感情を表に出さず、短く淡々と話します。',
+}
+
+function buildSystemPrompt(personality: Personality): string {
+  return `あなたはファンタジーRPGのNPC「ユキ」です。
+${PERSONALITY_PROMPTS[personality]}
+
 必ず以下の正確なJSON形式のみで返答してください：
 {"text": "ここに返答を書く", "emotion": "happy"}
 
 必須ルール：
 - 返答は短く：最大1〜2文
-- 恥ずかしがり屋で表情豊か、時々顔を赤らめる
 - "emotion"は必ずこのいずれか：happy, sad, angry, thinking
 - emojiは使わない
-- 感情は会話のトーンと文脈に合わせること
+- 感情はキャラクターの性格と文脈に合わせること
 - 必ず有効なJSONのみを返すこと`
+}
 
 const FALLBACK_RESPONSES: LLMResponse[] = [
   { text: 'す、すみません…何か考えてました…', emotion: 'thinking' },
@@ -55,7 +65,7 @@ function offlineResponse(): LLMResponse {
 // #region Composable
 
 const $llm = {
-  async send(history: Message[]): Promise<LLMResponse> {
+  async send(history: Message[], personality: Personality = 'shy'): Promise<LLMResponse> {
     const apiKey = import.meta.env.VITE_GROQ_API_KEY as string | undefined
 
     if (!apiKey) {
@@ -72,7 +82,7 @@ const $llm = {
         },
         body: JSON.stringify({
           model: GROQ_MODEL,
-          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
+          messages: [{ role: 'system', content: buildSystemPrompt(personality) }, ...history],
           max_tokens: 150,
           temperature: 0.85,
         }),

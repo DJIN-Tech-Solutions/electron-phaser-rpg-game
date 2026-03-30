@@ -45,7 +45,7 @@ async function sendIntent(intent: string) {
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
 
-  const reply = await $llm.send(gameStore.history)
+  const reply = await $llm.send(gameStore.history, gameStore.personality)
 
   gameStore.history.push({ role: 'assistant', content: reply.text })
   gameStore.emotion = reply.emotion
@@ -65,7 +65,7 @@ async function sendFreeText() {
   gameStore.emotion = 'thinking'
   gameStore.state = 'waiting_llm'
 
-  const reply = await $llm.send(gameStore.history)
+  const reply = await $llm.send(gameStore.history, gameStore.personality)
 
   gameStore.history.push({ role: 'assistant', content: reply.text })
   gameStore.emotion = reply.emotion
@@ -78,7 +78,7 @@ async function startConversation() {
   gameStore.state = 'waiting_llm'
   gameStore.history = [{ role: 'user', content: 'プレイヤーがあなたに近づいて話しかけました。' }]
 
-  const reply = await $llm.send(gameStore.history)
+  const reply = await $llm.send(gameStore.history, gameStore.personality)
 
   gameStore.history.push({ role: 'assistant', content: reply.text })
   gameStore.emotion = reply.emotion

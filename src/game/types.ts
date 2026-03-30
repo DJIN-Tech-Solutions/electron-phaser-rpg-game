@@ -10,6 +10,8 @@ export type GameState =
 
 export type Emotion = 'thinking' | 'happy' | 'sad' | 'angry'
 
+export type Personality = 'shy' | 'tsundere' | 'playful' | 'cold'
+
 export interface LLMResponse {
   text: string
   emotion: Emotion

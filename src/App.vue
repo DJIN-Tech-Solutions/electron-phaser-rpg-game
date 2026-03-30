@@ -2,6 +2,7 @@
 //#region Imports
 import { ref, onMounted, onUnmounted } from 'vue'
 import DialogueUI from './components/DialogueUI.vue'
+import PersonalitySelector from './components/PersonalitySelector.vue'
 //#endregion
 
 //#region Game Setup
@@ -45,6 +46,7 @@ onUnmounted(function destroyGame() {
   <!--#region Game Wrapper -->
   <div class="game-wrapper">
     <div ref="gameContainer" id="game-container" />
+    <PersonalitySelector />
     <DialogueUI />
   </div>
   <!--#endregion -->

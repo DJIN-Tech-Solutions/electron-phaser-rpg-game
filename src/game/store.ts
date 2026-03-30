@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import type { GameState, Emotion, Message } from './types'
+import type { GameState, Emotion, Message, Personality } from './types'
 
 // #region Game Store (bridge between Phaser and Vue)
 
@@ -8,6 +8,7 @@ export const gameStore = reactive({
   emotion: 'happy' as Emotion,
   npcText: '',
   history: [] as Message[],
+  personality: 'shy' as Personality,
 })
 
 // #endregion
