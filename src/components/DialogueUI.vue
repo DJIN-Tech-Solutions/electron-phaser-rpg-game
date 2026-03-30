@@ -220,8 +220,8 @@ watch(
 }
 
 .portrait {
-  width: 260px;
-  height: 390px;
+  width: 340px;
+  height: 510px;
   object-fit: cover;
   object-position: top;
   border-radius: 12px 12px 0 0;
