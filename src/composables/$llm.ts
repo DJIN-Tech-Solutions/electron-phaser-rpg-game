@@ -23,13 +23,14 @@ ${PERSONALITY_PROMPTS[personality]}
 - 返答は短く：最大2〜3文
 - "emotion"は必ずこのいずれか：happy, sad, angry, thinking
 - emojiは使わない
-- 感情はキャラクターの性格と文脈に合わせること
+- 感情はその返答の内容に合わせて毎回新しく選ぶこと（前回と同じ感情を繰り返さないこと）
+- デフォルトはhappy。sad・angryは文脈が明確にそれを求める時だけ使うこと
 - 必ず有効なJSONのみを返すこと`
 }
 
 const FALLBACK_RESPONSES: LLMResponse[] = [
   { text: 'す、すみません…何か考えてました…', emotion: 'thinking' },
-  { text: 'あっ…ちょっとびっくりしました！', emotion: 'sad' },
+  { text: 'あっ…ちょっとびっくりしました！', emotion: 'happy' },
   { text: 'う…今は何と言えばいいか…', emotion: 'thinking' },
 ]
 
@@ -38,7 +39,7 @@ const FALLBACK_RESPONSES: LLMResponse[] = [
 // #region Helpers
 
 function fallback(): LLMResponse {
-  return { text: 'ごめんなさい…考え込んでしまいました…', emotion: 'sad' }
+  return { text: 'ごめんなさい…考え込んでしまいました…', emotion: 'thinking' }
 }
 
 function normalize(raw: string): LLMResponse {
