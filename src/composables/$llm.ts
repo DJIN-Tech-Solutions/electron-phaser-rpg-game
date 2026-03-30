@@ -26,13 +26,14 @@ const RESPOND_TOOL = {
         },
         emotion: {
           type: 'string',
-          enum: ['happy', 'sad', 'angry', 'thinking'],
+          enum: ['happy', 'sad', 'angry', 'thinking', 'bored'],
           description: [
             'Pick the emotion that fits Yuki\'s genuine reaction right now, based on her personality:',
             '  happy   — pleased, flustered-but-happy, relieved, warmly surprised',
             '  sad     — hurt, lonely, disappointed, on the verge of tears',
             '  angry   — annoyed, offended, flustered-hiding-it (tsundere spike), frustrated',
             '  thinking — hesitant, uncertain, lost for words, processing something unexpected',
+            '  bored   — uninterested, indifferent, dismissive, enduring something tedious',
           ].join('\n'),
         },
       },
@@ -65,6 +66,7 @@ const PERSONALITY_PROMPTS: Record<Personality, string> = {
 感情の傾向：
  • angry    → 一番よく使う。褒められ・ナンパ・からかいへのデフォルト反応（ツンモード）
  • thinking → 動揺を隠そうとしているとき、どう反応すべきか迷っているとき
+ • bored    → 相手がつまらないことを言ったとき、興味を持てないとき（そっけない態度）
  • happy    → 素直になれた珍しい瞬間、本音が出てしまったとき
  • sad      → 本当に傷ついたとき（珍しい）`.trim(),
 
@@ -75,6 +77,7 @@ const PERSONALITY_PROMPTS: Record<Personality, string> = {
 感情の傾向：
  • happy    → ほぼ常に使う。笑顔で楽しそうに話す
  • thinking → いたずらを計画しているとき、面白いことを思いついたとき
+ • bored    → 相手が全然のってこないとき、会話がつまらないとき
  • sad      → 無視されたとき、相手が離れていきそうなとき
  • angry    → 本当につまらないことを言われたとき（珍しい）`.trim(),
 
@@ -83,7 +86,8 @@ const PERSONALITY_PROMPTS: Record<Personality, string> = {
 話し方：短く、淡々と。感嘆符は使わない。敬語に近い距離感を保つ。
 
 感情の傾向：
- • thinking → ほぼ常に使う。冷静に考えているような顔
+ • bored    → よく使う。相手に興味が持てないとき、会話が無意味に感じるとき
+ • thinking → 冷静に考えているような顔。bored同様よく使う
  • angry    → 煩わしいとき、しつこくされたとき
  • sad      → 何か深いものに触れられた珍しい瞬間
  • happy    → ほぼ使わない`.trim(),
@@ -122,7 +126,7 @@ function offlineResponse(): LLMResponse {
 function parseToolCall(args: string): LLMResponse {
   try {
     const parsed = JSON.parse(args) as { text?: unknown; emotion?: unknown }
-    const validEmotions = ['happy', 'sad', 'angry', 'thinking']
+    const validEmotions = ['happy', 'sad', 'angry', 'thinking', 'bored']
 
     const text    = typeof parsed.text    === 'string' && parsed.text.trim() ? parsed.text.trim() : null
     const emotion = typeof parsed.emotion === 'string' && validEmotions.includes(parsed.emotion)
