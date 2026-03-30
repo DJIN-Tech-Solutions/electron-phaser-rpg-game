@@ -1,49 +1,63 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+//#region Imports
+import { ref, onMounted, onUnmounted } from 'vue'
+import DialogueUI from './components/DialogueUI.vue'
+//#endregion
+
+//#region Game Setup
+const gameContainer = ref<HTMLElement | null>(null)
+let game: import('phaser').Game | null = null
+
+onMounted(async function initGame() {
+  if (!gameContainer.value) return
+
+  const Phaser = (await import('phaser')).default
+  const { GameScene } = await import('./game/GameScene')
+
+  game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: gameContainer.value,
+    width: 800,
+    height: 600,
+    backgroundColor: '#0d0d1a',
+    scene: [GameScene],
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    render: {
+      antialias: true,
+    },
+  })
+})
+
+onUnmounted(function destroyGame() {
+  game?.destroy(true)
+  game = null
+})
+//#endregion
 </script>
 
 <template>
-  <div>
-    <a href="https://www.electronjs.org/" target="_blank">
-      <img src="./assets/electron.svg" class="logo electron" alt="Electron logo" />
-    </a>
-    <a href="https://vitejs.dev/" target="_blank">
-      <img src="./assets/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <!--#region Game Wrapper -->
+  <div class="game-wrapper">
+    <div ref="gameContainer" id="game-container" />
+    <DialogueUI />
   </div>
-  <HelloWorld msg="Electron + Vite + Vue" />
-  <div class="flex-center">
-    Place static files into the <code>/public</code> folder
-    <img style="width: 2.4em; margin-left: .4em;" src="/logo.svg" alt="Logo">
-  </div>
+  <!--#endregion -->
 </template>
 
-<style>
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+<style scoped>
+.game-wrapper {
+  width: 100vw;
+  height: 100vh;
+  background: #0d0d1a;
+  overflow: hidden;
+  position: relative;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo.electron:hover {
-  filter: drop-shadow(0 0 2em #9FEAF9);
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+#game-container {
+  width: 100%;
+  height: 100%;
 }
 </style>
