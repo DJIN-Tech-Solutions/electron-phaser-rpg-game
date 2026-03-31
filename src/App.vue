@@ -5,11 +5,28 @@ import DialogueUI from './components/DialogueUI.vue'
 import PersonalitySelector from './components/PersonalitySelector.vue'
 //#endregion
 
+//#region Fullscreen
+const isFullscreen = ref(!!document.fullscreenElement)
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen()
+  } else {
+    document.exitFullscreen()
+  }
+}
+
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement
+}
+//#endregion
+
 //#region Game Setup
 const gameContainer = ref<HTMLElement | null>(null)
 let game: import('phaser').Game | null = null
 
 onMounted(async function initGame() {
+  document.addEventListener('fullscreenchange', onFullscreenChange)
   if (!gameContainer.value) return
 
   const Phaser = (await import('phaser')).default
@@ -36,6 +53,7 @@ onMounted(async function initGame() {
 })
 
 onUnmounted(function destroyGame() {
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
   game?.destroy(true)
   game = null
 })
@@ -48,6 +66,19 @@ onUnmounted(function destroyGame() {
     <div ref="gameContainer" id="game-container" />
     <PersonalitySelector />
     <DialogueUI />
+
+    <!--#region Fullscreen Button -->
+    <button class="fullscreen-btn" :title="isFullscreen ? '縮小' : '全画面'" @click="toggleFullscreen">
+      {{ isFullscreen ? '⛶' : '⛶' }}
+      <svg v-if="!isFullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+      </svg>
+      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+      </svg>
+    </button>
+    <!--#endregion -->
+
   </div>
   <!--#endregion -->
 </template>
@@ -62,6 +93,37 @@ onUnmounted(function destroyGame() {
 }
 
 #game-container {
+  width: 100%;
+  height: 100%;
+}
+
+.fullscreen-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 5, 25, 0.88);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  border-radius: 8px;
+  color: #a78bfa;
+  cursor: pointer;
+  transition: all 0.15s;
+  backdrop-filter: blur(6px);
+}
+
+.fullscreen-btn:hover {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: #a78bfa;
+  color: #fff;
+}
+
+.fullscreen-btn svg {
   width: 100%;
   height: 100%;
 }

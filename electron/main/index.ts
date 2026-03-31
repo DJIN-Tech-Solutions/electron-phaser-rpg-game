@@ -46,8 +46,10 @@ async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
-    fullscreen: true,
-    frame: false,
+    width: 1280,
+    height: 720,
+    fullscreen: false,
+    frame: true,
     webPreferences: {
       preload,
       devTools: !!VITE_DEV_SERVER_URL,
