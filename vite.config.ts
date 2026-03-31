@@ -69,6 +69,7 @@ export default defineConfig(({ command }) => {
         port: +url.port,
       }
     })(),
+    base: './',
     publicDir: 'electron/assets',
     clearScreen: false,
   }
