@@ -28,11 +28,11 @@ export class BootScene extends Phaser.Scene {
     })
 
     // Tilemap
-    this.load.tilemapTiledJSON('map', '/tilemaps/tuxemon-town.json')
-    this.load.image('tiles', '/tilesets/tuxemon-sample-32px-extruded.png')
+    this.load.tilemapTiledJSON('map', 'tilemaps/tuxemon-town.json')
+    this.load.image('tiles', 'tilesets/tuxemon-sample-32px-extruded.png')
 
     // Player sprite atlas
-    this.load.atlas('player', '/atlas/atlas.png', '/atlas/atlas.json')
+    this.load.atlas('player', 'atlas/atlas.png', 'atlas/atlas.json')
   }
 
   create() {

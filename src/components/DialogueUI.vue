@@ -8,13 +8,13 @@ import type { Emotion } from '../game/types'
 
 //#region Emotion Map
 const emotionMap: Record<Emotion, string> = {
-  thinking: '/npc_01_thinking.png',
-  happy:    '/npc_01_happy.png',
-  sad:      '/npc_01_sad.png',
-  angry:    '/npc_01_angry.png',
-  bored:        '/npc_01_bored.png',
-  cheerleading: '/npc_01_cheerleading.png',
-  cheers:       '/npc_01_cheers.png',
+  thinking: 'npc_01_thinking.png',
+  happy:    'npc_01_happy.png',
+  sad:      'npc_01_sad.png',
+  angry:    'npc_01_angry.png',
+  bored:        'npc_01_bored.png',
+  cheerleading: 'npc_01_cheerleading.png',
+  cheers:       'npc_01_cheers.png',
 }
 //#endregion
 
