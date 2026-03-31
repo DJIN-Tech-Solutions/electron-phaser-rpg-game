@@ -140,7 +140,7 @@ onUnmounted(function destroyGame() {
   font-family: monospace;
   font-size: 10px;
   letter-spacing: 0.5px;
-  color: rgba(167, 139, 250, 0.45);
+  color: rgba(233, 213, 255, 0.85);
   pointer-events: none;
   user-select: none;
 }
