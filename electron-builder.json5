@@ -26,7 +26,9 @@
         ]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
+    "sign": false,
+    "signingHashAlgorithms": null
   },
   "nsis": {
     "oneClick": false,
