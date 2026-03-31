@@ -67,6 +67,10 @@ onUnmounted(function destroyGame() {
     <PersonalitySelector />
     <DialogueUI />
 
+    <!--#region Trademark -->
+    <div class="trademark">© Diniz Vitor — All rights reserved</div>
+    <!--#endregion -->
+
     <!--#region Fullscreen Button -->
     <button class="fullscreen-btn" :title="isFullscreen ? '縮小' : '全画面'" @click="toggleFullscreen">
       {{ isFullscreen ? '⛶' : '⛶' }}
@@ -126,5 +130,18 @@ onUnmounted(function destroyGame() {
 .fullscreen-btn svg {
   width: 100%;
   height: 100%;
+}
+
+.trademark {
+  position: fixed;
+  bottom: 12px;
+  right: 16px;
+  z-index: 50;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: rgba(167, 139, 250, 0.45);
+  pointer-events: none;
+  user-select: none;
 }
 </style>

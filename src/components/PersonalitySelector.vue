@@ -1,7 +1,17 @@
 <script setup lang="ts">
 //#region Imports
+import { computed } from 'vue'
 import { gameStore } from '../game/store'
 import type { Personality } from '../game/types'
+//#endregion
+
+//#region Visibility
+const isVisible = computed(() =>
+  gameStore.state === 'interacting' ||
+  gameStore.state === 'waiting_llm' ||
+  gameStore.state === 'npc_reply' ||
+  gameStore.state === 'player_choice'
+)
 //#endregion
 
 //#region Options
@@ -26,7 +36,8 @@ function select(p: Personality) {
 
 <template>
   <!--#region Personality Selector -->
-  <div class="personality-panel">
+  <Transition name="fade">
+  <div v-if="isVisible" class="personality-panel">
     <div class="panel-title">キャラクター</div>
     <div class="options">
       <button
@@ -42,6 +53,7 @@ function select(p: Personality) {
       </button>
     </div>
   </div>
+  </Transition>
   <!--#endregion -->
 </template>
 
@@ -127,4 +139,9 @@ function select(p: Personality) {
   color: #7c3aed;
   margin-left: auto;
 }
+
+.fade-enter-active,
+.fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from,
+.fade-leave-to      { opacity: 0; }
 </style>
